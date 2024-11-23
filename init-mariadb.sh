@@ -1,7 +1,24 @@
 #!/bin/bash
 
-service mysql start
+# Asegurar que los directorios estén preparados
+mkdir -p /var/run/mysqld
+chown -R mysql:mysql /var/run/mysqld
 
+# Inicializar MariaDB si no se ha inicializado previamente
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Inicializando la base de datos..."
+    mysql_install_db --user=mysql --ldata=/var/lib/mysql
+fi
+
+# Iniciar MariaDB
+echo "Iniciando MariaDB..."
+mysqld_safe --skip-networking &
+
+# Esperar a que MariaDB esté listo
+sleep 5
+
+# Crear base de datos y datos iniciales
+echo "Configurando la base de datos..."
 mysql -u root <<EOF
 CREATE DATABASE IF NOT EXISTS prueba;
 USE prueba;
@@ -45,3 +62,8 @@ INSERT INTO casting (pelicula_id, actor_id, papel) VALUES
     (2, 1, 'Iron Man'),
     (3, 3, 'Thor');
 EOF
+
+# Detener mysqld_safe y reiniciar MariaDB normalmente
+killall mysqld_safe
+mysqld_safe --datadir=/var/lib/mysql &
+apache2ctl -D FOREGROUND
