@@ -65,5 +65,4 @@ EOF
 
 # Detener mysqld_safe y reiniciar MariaDB normalmente
 killall mysqld_safe
-mysqld_safe --datadir=/var/lib/mysql &
-apache2ctl -D FOREGROUND
+mysqld_safe
